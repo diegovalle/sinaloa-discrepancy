@@ -1,0 +1,9 @@
+| Year | Total Homicides | Drug-Related Homicides | Accidental Firearm Deaths |
+| 2004 |             387 |                     NA |                        61 |
+| 2005 |             450 |                     NA |                        47 |
+| 2006 |             451 |                     NA |                        24 |
+| 2007 |             387 |                    414 |                       204 |
+| 2008 |             869 |                   1084 |                       196 |
+| 2009 |            1309 |                   1059 |                        31 |
+| 2010 |           2505* |                   1813 |                        NA |
+*Data from http://www.inegi.org.mx/inegi/contenidos/espanol/prensa/Boletines/Boletin/Comunicados/Especiales/2011/julio/comunica9.doc
