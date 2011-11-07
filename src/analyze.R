@@ -3,16 +3,19 @@
 #Analyze the data
 ########################################################
 
-
+#Aggregate the drug war deaths by state
 map <- merge(drug.homicides, municipality.heads, by = "id")
 map$Date <- as.Date(str_c(map$Date, "15", sep = "-"),
                     format = "%b-%Y-%d")
 map$Year <- year(map$Date)
 
+
+#The state of Sinaloa corresponds to the StateCode 25
 drh.sin <- ddply(subset(map, StateCode == 25), .(Date), function(df) sum(df$Total))
 drh.sin$type <- "Drug Homicides"
 drh.sin$Date <- as.Date(drh.sin$Date)
 
+#Aggragate accidental deaths by firearm
 acc.sin <- ddply(subset(deaths, CAUSE == "Firearm" &
                         PRESUNTOtxt == "Accident" &
                         ABBRV== "Sin" & MESDEF != 0),
@@ -21,6 +24,7 @@ acc.sin <- ddply(subset(deaths, CAUSE == "Firearm" &
 acc.sin$Date <- as.Date(str_c(acc.sin$ANIODEF, acc.sin$MESDEF, 15, sep = "-") )
 acc.sin$type <- "Firearm Accidents"
 
+#Aggregate homicides
 hom.sin <- ddply(subset(deaths, 
              PRESUNTOtxt == "Homicide" &
              ABBRV== "Sin" & MESDEF != 0),
@@ -29,8 +33,10 @@ hom.sin <- ddply(subset(deaths,
 hom.sin$Date <- as.Date(str_c(hom.sin$ANIODEF, hom.sin$MESDEF, 15, sep = "-") )
 hom.sin$type <- "All Homicides"
 
+#rbind drug-related, accidents by arms and total homicides
 sin <- rbind.fill(drh.sin, acc.sin)
 sin <- rbind.fill(sin, hom.sin)
+
 
 sin$type <- factor(factor(sin$type),
                    levels = c( "Drug Homicides",
@@ -51,6 +57,7 @@ ggplot(sin, aes(Date, V1, group = type, color = type, fill = type)) +
 ggsave("graphs/drh_firearm-acc_hom.png", dpi = 100,
        w = 9.6, h = 5)
 
+#Create a chart with the excess deaths
 m <- merge(drh.sin, hom.sin, by = "Date", all.y = TRUE)
 m$diff <- m$V1.x - m$V1.y
 m <- merge(m, acc.sin)
@@ -72,6 +79,10 @@ ggplot(m, aes(Date, diff)) +
 ggsave("graphs/diffplot.png", dpi = 100,
        w = 9.6, h = 5)
 
+#Create a plot with the first differences of drug related
+#homicides and total homicides. Since accidental deaths
+#by firearm went down in 2009 I'm not really worried
+#about autocorrelation, but still...
 m <- subset(m, Date <= as.Date("2009-01-01"))[35:57,]
 first.diff <- data.frame(diff = diff(m$diff), v = diff(m$V1))
 cor.test(first.diff$diff, first.diff$v)
@@ -80,6 +91,8 @@ ggplot(m, aes(diff, v)) +
   geom_point() +
   geom_smooth(method = lm)
 
+
+#Deaths by external injury (legal intervention, accidents and unspecified) that were not homicides in Sinaloa
 acc <- ddply(subset(deaths, CAUSE %in% c("Firearm", "Unspecified",
                                          "Cut/pierce",
                                          "Struck by or against") &
@@ -104,7 +117,7 @@ direct.label(p, "last.bumpup")
 ggsave("graphs/injury-intent.png", dpi = 100,
        w = 9.6, h = 5)
 
-
+#Stupid shit
 ddply(subset(deaths, 
              PRESUNTOtxt == "Homicide" &
              ABBRV== "Sin"),
@@ -125,7 +138,7 @@ ddply(subset(deaths,
 
 ddply(subset(map, ENTOCU == 25), .(Year), function(df) sum(df$Total))
 
-
+#If I'm right and homicides were misclassified as accidental deaths should have happened out in the open
 fir.acc <- ddply(subset(deaths, CAUSE == "Firearm" &
                          PRESUNTOtxt == "Accident" &
                          ABBRV == "Sin" &
@@ -143,7 +156,7 @@ direct.label(p, "top.bumpup")
 ggsave("graphs/accident-place.png", dpi = 100,
        w = 9.6, h = 5)
 
-
+#Homicides by firearm occur in public places
 p <- ggplot(ddply(subset(deaths, CAUSE == "Firearm" &
                          PRESUNTOtxt == "Homicide" &
                          ABBRV== "Sin" ),
@@ -162,7 +175,7 @@ ggsave("graphs/homicide-place.png", dpi = 100,
 
 #with(fir.acc, expand.grid(ANIODEF, CAUSE, LUGLEStxt))
 
-
+#more stupid shit
 ddply(subset(deaths, 
              PRESUNTOtxt == "Homicide" ),
              #!is.na(MVTPER)),

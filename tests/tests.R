@@ -4,7 +4,7 @@ expect_that(ICDseq(start = "A1", end = "A3"), matches(c("A01", "A02", "A03")))
 expect_that(ICDseq(start = "Z1", end = "Z6"), matches(c("Z01", "Z02", "Z03",
                                    "Z04", "Z05", "Z06")))
 
-#Test that the mortality database is code correctly
+#Test that the mortality database is coded correctly
 expect_that(deaths[deaths$CAUSADEF %in% ICDseq("W25", "W29"),]$CAUSE,
             matches("Cut/pierce"))
 
