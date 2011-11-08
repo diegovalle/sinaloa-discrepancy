@@ -4,14 +4,18 @@
 ########################################################
 
 #Aggregate the drug war deaths by state
-map <- merge(drug.homicides, municipality.heads, by = "id")
-map$Date <- as.Date(str_c(map$Date, "15", sep = "-"),
+drug.homicides$Date <- as.Date(str_c(drug.homicides$Date, "15", sep = "-"),
                     format = "%b-%Y-%d")
-map$Year <- year(map$Date)
+drug.homicides$Year <- year(drug.homicides$Date)
+
+#A quick table of homicides by year
+ascii(ddply(subset(drug.homicides, StateCode == 25), .(Year),
+                 function(df) sum(df$Total, na.rm = TRUE)))
 
 
 #The state of Sinaloa corresponds to the StateCode 25
-drh.sin <- ddply(subset(map, StateCode == 25), .(Date), function(df) sum(df$Total))
+drh.sin <- ddply(subset(drug.homicides, StateCode == 25), .(Date),
+                 function(df) sum(df$Total, na.rm = TRUE))
 drh.sin$type <- "Drug Homicides"
 drh.sin$Date <- as.Date(drh.sin$Date)
 
