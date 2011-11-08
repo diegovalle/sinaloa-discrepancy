@@ -15,6 +15,8 @@ library(stringr)
 library(lubridate)
 library(directlabels)
 library(testthat)
+library(ascii)
+options(asciiType = "org")
 
 theme_set(theme_bw())
 
@@ -26,9 +28,10 @@ deaths <- read.csv("data/sinaloa-deaths.csv.bz2", fileEncoding = "utf-8")
 drug.homicides <- read.csv("data/drug-homicides.csv.bz2", fileEncoding = "utf-8")
 municipality.heads <- read.csv("data/municipality-heads.csv", fileEncoding = "utf-8")
 
-#recode the database with the injury intente mortality matrix
+#recode the database with the injury intent mortality matrix
 source("src/codeMM.R")
-#Unite testing
+#Unit testing
 source("tests/tests.R")
 #Create the graphs
 source("src/analyze.R")
+

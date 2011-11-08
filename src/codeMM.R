@@ -5,7 +5,7 @@
 
 ICDseq <- function(start, end) {
   ##Produce a sequence of icd codes
-  ##start = A1 end= A9 procudes A1, A2, A3... A9
+  ##start = A1 end= A9 outputs A1, A2, A3... A9
   ##start and end should begin with the same letter
   letter <- str_sub(start, 1, 1)
   number1 <-  as.numeric(str_sub(start, 2, length(str) + 2))
@@ -18,7 +18,7 @@ ICDseq <- function(start, end) {
 
 MortalityMatrix <- function(df, codes, name) {
   #Recode the Mexican Mortality Database with the
-  ##injury mortality matrix from the cdc
+  ##injury mortality matrix from the CDC
   ##http://www.cdc.gov/nchs/data/ice/icd10_transcode.pdf
   ##
   ##df - the database
