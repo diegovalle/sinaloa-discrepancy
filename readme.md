@@ -1,6 +1,6 @@
 
 Reconciling homicide counts in Sinaloa
---------------------------------------
+======================================
 
 This program analyzes the discrepancy in the homicide
 data for the state of Sinaloa. 
@@ -12,8 +12,20 @@ which, of course, should be impossible. This program shows
 the discrepancy was due to an excess of deaths registered
 as accidents whose cause of injury was a firearm.
 
+
+Data
+----
+
+In the data directory you'll find the following files:
+
+*drug-homicides.csv.bz2*: All drug war related homicides (also called organize crime related or due to delinquent rivalry) from Dec 2006 to Dec 2010 in all of Mexico
+
+*municipality-heads.csv.bz2*: A list of the names of each municipality in 2007
+
+*sinaloa-deaths.csv.bz2*: All injury intent deaths (accidents, suicides, homicides, unspecified, and legal operations) registered in the state of Sinaloa by the Mexican vital statistic system from 2004 to 2009
+
 Sources
-=======
+-------
 
 _Homicides from:_
 
