@@ -140,7 +140,7 @@ ddply(subset(deaths,
       .(ANIODEF),
       nrow)$V1 - round(background*12)
 
-ddply(subset(map, ENTOCU == 25), .(Year), function(df) sum(df$Total))
+#ddply(subset(map, ENTOCU == 25), .(Year), function(df) sum(df$Total))
 
 #If I'm right and homicides were misclassified as accidental deaths should have happened out in the open
 fir.acc <- ddply(subset(deaths, CAUSE == "Firearm" &
@@ -149,13 +149,15 @@ fir.acc <- ddply(subset(deaths, CAUSE == "Firearm" &
                         ANIODEF != 0),
                   .(ANIODEF, CAUSE, LUGLEStxt),
                   nrow)
+#fir.acc <- ddply(fir.acc, .(ANIODEF), transform, V1 = V1 / sum(V1))
 fir.acc <- merge(unique(expand.grid(fir.acc[,1:3])), fir.acc, all.x = TRUE)
 fir.acc[is.na(fir.acc)] <- 0
 p <- ggplot(fir.acc, aes(ANIODEF, V1, color = LUGLEStxt)) +
   geom_line(alpha = .8) +
   ylab("number of accidents") +
   xlab("year") +
-  opts(title = "Accidental deaths by firearm in Sinaloa, by place of occurrence")
+  opts(title = "Accidental deaths by firearm in Sinaloa, by place of occurrence") +
+  scale_y_continuous(formatter = "percent")
 direct.label(p, "top.bumpup")
 ggsave("graphs/accident-place.png", dpi = 100,
        w = 9.6, h = 5)
