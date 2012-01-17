@@ -11,6 +11,7 @@
 #as accidents whose cause of injury was a firearm.
 
 library(ggplot2)
+library(plyr)
 library(stringr)
 library(lubridate)
 library(directlabels)
@@ -28,10 +29,15 @@ deaths <- read.csv("data/sinaloa-deaths.csv.bz2", fileEncoding = "utf-8")
 drug.homicides <- read.csv("data/drug-homicides.csv.bz2", fileEncoding = "utf-8")
 municipality.heads <- read.csv("data/municipality-heads.csv", fileEncoding = "utf-8")
 
+#Assume that deaths without a date of registration occurred on the same date they were registered
+#deaths[which(deaths$ANIODEF == 0),]$ANIODEF <- deaths[which(deaths$ANIODEF == 0),]$ANIOREG
+deaths[which(deaths$MESDEF == 0),]$MESDEF <- deaths[which(deaths$MESDEF == 0),]$MESREG
+deaths[which(deaths$DIADEF == 0),]$DIADEF <- deaths[which(deaths$DIADEF == 0),]$DIAREG
+
 #recode the database with the injury intent mortality matrix
 source("src/codeMM.R")
 #Unit testing
-source("tests/tests.R")
+test_dir("tests")
 #Create the graphs
 source("src/analyze.R")
 

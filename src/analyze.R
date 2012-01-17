@@ -22,7 +22,7 @@ drh.sin$Date <- as.Date(drh.sin$Date)
 #Aggragate accidental deaths by firearm
 acc.sin <- ddply(subset(deaths, CAUSE == "Firearm" &
                         PRESUNTOtxt == "Accident" &
-                        ABBRV== "Sin" & MESDEF != 0),
+                        ABBRV== "Sin"),
                 .(ANIODEF, MESDEF),
                 nrow)
 acc.sin$Date <- as.Date(str_c(acc.sin$ANIODEF, acc.sin$MESDEF, 15, sep = "-") )
@@ -31,7 +31,7 @@ acc.sin$type <- "Firearm Accidents"
 #Aggregate homicides
 hom.sin <- ddply(subset(deaths, 
              PRESUNTOtxt == "Homicide" &
-             ABBRV== "Sin" & MESDEF != 0),
+             ABBRV== "Sin"),
             .(ANIODEF, MESDEF),
             nrow)
 hom.sin$Date <- as.Date(str_c(hom.sin$ANIODEF, hom.sin$MESDEF, 15, sep = "-") )

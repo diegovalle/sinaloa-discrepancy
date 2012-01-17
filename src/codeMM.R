@@ -3,7 +3,7 @@
 # classify the type of injury to firearm, poisoning,
 # etc. 
 
-ICDseq <- function(start, end) {
+ICDSeq <- function(start, end) {
   ##Produce a sequence of icd codes
   ##start = A1 end= A9 outputs A1, A2, A3... A9
   ##start and end should begin with the same letter
@@ -34,7 +34,7 @@ MortalityMatrix <- function(df, codes, name) {
   for (i in l[[1]]) {
     if(str_detect(i, "-")) {
       x <- str_split(i, "-")
-      sequence <- c(sequence, ICDseq(x[[1]][1], x[[1]][2]))
+      sequence <- c(sequence, ICDSeq(x[[1]][1], x[[1]][2]))
     } else {
       if(str_length(i) == 4) {
         Cdeaths <-  c(Cdeaths, i)
