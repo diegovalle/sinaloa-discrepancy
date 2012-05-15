@@ -10,34 +10,21 @@
 #the discrepancy was due to an excess of deaths registered
 #as accidents whose cause of injury was a firearm.
 
-library(ggplot2)
-library(plyr)
-library(stringr)
-library(lubridate)
-library(directlabels)
-library(testthat)
-library(ascii)
-options(asciiType = "org")
 
-theme_set(theme_bw())
-
-########################################################
-#Load the data
-########################################################
-
-deaths <- read.csv("data/sinaloa-deaths.csv.bz2", fileEncoding = "utf-8")
-drug.homicides <- read.csv("data/drug-homicides.csv.bz2", fileEncoding = "utf-8")
-municipality.heads <- read.csv("data/municipality-heads.csv", fileEncoding = "utf-8")
-
-#Assume that deaths without a date of registration occurred on the same date they were registered
-#deaths[which(deaths$ANIODEF == 0),]$ANIODEF <- deaths[which(deaths$ANIODEF == 0),]$ANIOREG
-deaths[which(deaths$MESDEF == 0),]$MESDEF <- deaths[which(deaths$MESDEF == 0),]$MESREG
-deaths[which(deaths$DIADEF == 0),]$DIADEF <- deaths[which(deaths$DIADEF == 0),]$DIAREG
-
+#libraries needed for the analysis
+source(file.path("src", "load-libraries.R"))
+#load all injury intent deaths in the state of Sinaloa
+source(file.path("src", "load-data.R"))
 #recode the database with the injury intent mortality matrix
-source("src/codeMM.R")
+source(file.path("src", "codeMM.R"))
 #Unit testing
 test_dir("tests")
 #Create the graphs
-source("src/analyze.R")
+source(file.path("src", "analyze.R"))
+
+#Try and classify accidents and homicides
+#I couldn't :(
+source(file.path("src", "multiple-imputation.R"))
+source(file.path("src", "classify.R"))
+
 

@@ -1,6 +1,6 @@
 
 ########################################################
-#Analyze the data
+#Explore the data
 ########################################################
 
 #Aggregate the drug war deaths by state
@@ -8,7 +8,7 @@ drug.homicides$Date <- as.Date(str_c(drug.homicides$Date, "15", sep = "-"),
                     format = "%b-%Y-%d")
 drug.homicides$Year <- year(drug.homicides$Date)
 
-#A quick table of homicides by year
+#A quick table of drug homicides by year
 ascii(ddply(subset(drug.homicides, StateCode == 25), .(Year),
                  function(df) sum(df$Total, na.rm = TRUE)))
 
@@ -48,16 +48,14 @@ sin$type <- factor(factor(sin$type),
                      "Firearm Accidents"))
 ggplot(sin, aes(Date, V1, group = type, color = type, fill = type)) +
   geom_area(alpha = .4, position = "identity") +
-  geom_line() +
+  geom_line(show_guide = FALSE) +
   ylab("number of deaths") +
   xlab("date") +
   scale_fill_hue("type of\ndeath") +
   scale_color_hue("type of\ndeath") +
   opts(title = "Firearm accidents, total homicides, and drug-related homicides in Sinaloa",
        legend.position = c(.19,.78),
-       legend.background = theme_rect(fill="white",colour="white")) +
-  scale_x_date(minor = "6 months", limits = c(as.Date("2004-01-01"),
-                                     as.Date("2009-12-15")))
+       legend.background = theme_rect(fill="white",colour="white")) 
 ggsave("graphs/drh_firearm-acc_hom.png", dpi = 100,
        w = 9.6, h = 5)
 
@@ -77,9 +75,10 @@ ggplot(m, aes(Date, diff)) +
   xlab("date") +
   ylab("difference in deaths") +
   opts(title = "Drug-related homicides and accidental deaths by firearm in Sinaloa",
-       legend.position = c(.4,.82),
-       legend.background = theme_rect(fill="white",colour="white"))+
-  scale_x_date(minor = "6 months",)
+       legend.position = c(.4,.89),
+       legend.background = theme_rect(fill="white",colour="white")) +
+  scale_x_date(limits=c(as.Date("2004-01-01"), as.Date("2009-08-01"))) +
+  ylim(-50, 55)
 ggsave("graphs/diffplot.png", dpi = 100,
        w = 9.6, h = 5)
 
@@ -91,7 +90,7 @@ m <- subset(m, Date <= as.Date("2009-01-01"))[35:57,]
 first.diff <- data.frame(diff = diff(m$diff), v = diff(m$V1))
 cor.test(first.diff$diff, first.diff$v)
 
-ggplot(m, aes(diff, v)) +
+ggplot(first.diff, aes(diff, v)) +
   geom_point() +
   geom_smooth(method = lm)
 
@@ -99,7 +98,14 @@ ggplot(m, aes(diff, v)) +
 #Deaths by external injury (legal intervention, accidents and unspecified) that were not homicides in Sinaloa
 acc <- ddply(subset(deaths, CAUSE %in% c("Firearm", "Unspecified",
                                          "Cut/pierce",
-                                         "Struck by or against") &
+                                         "Struck by or against",
+                                         "Suffocation") &
+                        PRESUNTOtxt != "Homicide" & 
+                    MESDEF != 0),
+                .(ANIODEF, CAUSE),
+                nrow)
+
+acc <- ddply(subset(deaths, 
                         PRESUNTOtxt != "Homicide" & 
                     MESDEF != 0),
                 .(ANIODEF, CAUSE),
@@ -114,7 +120,7 @@ p <- ggplot(acc, aes(ANIODEF, V1, group = CAUSE, color = CAUSE)) +
   ylab("number of deaths (log scale)") +
   xlab("date") +
   opts(title = "Deaths by external injury that were not homicides in Sinaloa, by selected causes") +
-  xlim(2004, 2009.9)
+  xlim(2004, 2012)
   #scale_x_date(minor = "6 months", limits = c(as.Date("2004-01-01"),
    #                                  as.Date("2011-07-01")))
 direct.label(p, "last.bumpup")
@@ -157,7 +163,8 @@ p <- ggplot(fir.acc, aes(ANIODEF, V1, color = LUGLEStxt)) +
   ylab("number of accidents") +
   xlab("year") +
   opts(title = "Accidental deaths by firearm in Sinaloa, by place of occurrence") +
-  scale_y_continuous(formatter = "percent")
+  scale_y_continuous()+
+  xlim(2004, 2010.2) 
 direct.label(p, "top.bumpup")
 ggsave("graphs/accident-place.png", dpi = 100,
        w = 9.6, h = 5)
@@ -169,10 +176,11 @@ p <- ggplot(ddply(subset(deaths, CAUSE == "Firearm" &
                   .(ANIODEF, CAUSE, LUGLEStxt),
                   nrow), aes(ANIODEF, V1, color = LUGLEStxt)) +
   geom_line() +
-  ylab("number of homicides") +
+  ylab("number of homicides (log scale)") +
   xlab("year") +
   opts(title = "Homicides by firearm in Sinaloa, by place of occurrence") +
-  xlim(2004, 2011)
+  xlim(2004, 2011)+
+  scale_y_log10() 
 direct.label(p, "last.bumpup")
 ggsave("graphs/homicide-place.png", dpi = 100,
        w = 9.6, h = 5)
