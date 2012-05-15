@@ -10,7 +10,7 @@ In 2007 and 2008 there
 were more drug-war related murders than total murders
 which, of course, should be impossible. This program shows
 the discrepancy was due to an excess of deaths registered
-as accidents whose cause of injury was a firearm.
+as accidents whose cause of injury was a firearm. I tried to classify the individual deaths into accidents and homicides, but the characteristics of accidents by firearm and homicides by firearm are too close to produce reliable results.
 
 
 Data
@@ -23,6 +23,8 @@ In the data directory you'll find the following files:
 *municipality-heads.csv.bz2*: A list of the names of each municipality in 2007
 
 *sinaloa-deaths.csv.bz2*: All injury intent deaths (accidents, suicides, homicides, unspecified, and legal operations) registered in the state of Sinaloa by the Mexican vital statistic system from 2004 to 2009
+
+The file _DE-SSA08.doc_ contains a description of the variables in sinaloa-deaths.csv.bz2 (Spanich)
 
 Sources
 -------
