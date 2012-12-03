@@ -26,8 +26,7 @@ test_dir("tests")
 source(file.path("src", "analyze.R"))
 
 #Try and classify accidents and homicides
-#I couldn't :(
-source(file.path("src", "multiple-imputation.R"))
+##source(file.path("src", "multiple-imputation.R"))
 source(file.path("src", "classify.R"))
 
 

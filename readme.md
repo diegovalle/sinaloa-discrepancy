@@ -10,7 +10,7 @@ In 2007 and 2008 there
 were more drug-war related murders than total murders
 which, of course, should be impossible. This program shows
 the discrepancy was due to an excess of deaths registered
-as accidents whose cause of injury was a firearm. I tried to classify the individual deaths into accidents and homicides, but the characteristics of accidents by firearm and homicides by firearm are too close to produce reliable results.
+as accidents whose cause of injury was a firearm. I then classified the individual deaths into accidents and homicides to show that the extra firearm accidents in 2007 and 2008 resemble homicides more than accidents.
 
 
 Data
