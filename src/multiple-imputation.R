@@ -13,8 +13,7 @@
 sinaloa.mi <- subset(deaths, ABBRV %in% c("Sin") )
 #No legal interventions deaths in Sinaloa
 nrow(sinaloa.mi[sinaloa.mi$PRESUNTOtxt == "Legal intervention, operations of war, military operations, and terrorism",]) == 0
-#sinaloa.mi <- subset(sinaloa.mi, ANIODEF <=2008)
-#sinaloa.mi <- subset(sinaloa.mi, CAUSE == "Firearm" & PRESUNTOtxt %in% c("Accident", "Homicide"))
+
 
 
 #Set NA as appropiate
@@ -55,7 +54,6 @@ ggsave(plot = p,"graphs/missing.png", dpi= 100, w = 7, h = 5)
 
 #Now set all accidents and homicides in 2007 and 2008 as NA
 sinaloa.mi$PRESUNTOtxt[sinaloa.mi$ANIODEF %in% c(2007, 2008) &
-      #                 sinaloa.mi$CAUSE == "Firearm" &
                        sinaloa.mi$PRESUNTOtxt %in% c("Accident", "Homicide")] <- NA
 
 
@@ -82,40 +80,40 @@ ggsave(plot = p,"graphs/missing-with-accidents-n-homicides.png", dpi= 100, w = 7
 
 
 
-##Needed to cross validate how well the multiple imputation
+##Needed to cross-validate how well the multiple imputation
 ##classifies accidents and homicides
-fakeNA <- c()
-for(i in 1:nrow(sinaloa.mi)) {
-  if(sinaloa.mi[i,]$PRESUNTOtxt %in% c("Accident", "Homicide"))
-    fakeNA[i] <- runif(1) > .75
-  else
-    fakeNA[i] <- FALSE
-}
+## fakeNA <- c()
+## for(i in 1:nrow(sinaloa.mi)) {
+##   if(sinaloa.mi[i,]$PRESUNTOtxt %in% c("Accident", "Homicide"))
+##     fakeNA[i] <- runif(1) > .75
+##   else
+##     fakeNA[i] <- FALSE
+## }
 fakeFirearmAccidents <- c()
 for(i in 1:nrow(sinaloa.mi)) {
-  if(sinaloa.mi[i,]$PRESUNTOtxt %in% "Accident" &
+  if(sinaloa.mi[i,]$PRESUNTOtxt %in% c("Accident", "Homicide") &
      sinaloa.mi[i,]$CAUSE %in% "Firearm")
     fakeFirearmAccidents[i] <- runif(1) > .75
   else
     fakeFirearmAccidents[i] <- FALSE
 }
-sinaloa.mi$PRESUNTOtxt[fakeNA] <- NA
-#sinaloa.mi$PRESUNTOtxt[fakeFirearmAccidents] <- NA
+#sinaloa.mi$PRESUNTOtxt[fakeNA] <- NA
+sinaloa.mi$PRESUNTOtxt[fakeFirearmAccidents] <- NA
 
 
 
 #Perform the multiple imputation
 #Takes a long time!
 if(file.exists("IMP.RData")) {
-  message("Starting multiple impitation:")
+  load(file = "IMP.RData")
+} else {
+  message("Starting multiple imputation:")
   message("#############################")
   message("#############################")
   message("This will take some time")
   message("#############################")
   message("#############################")
-  load(file = "IMP.RData")
-} else {
-  IMP <- mi(object = sinaloa.mi[,cols], seed = 1)
+  IMP <- mi(sinaloa.mi[,cols], seed = 1)
   IMP <- mi(IMP)
   save(IMP, file = "IMP.RData")
 }
@@ -193,12 +191,12 @@ performance <- function(x, imputation.num = 1){
 avePerformance <- function(data) {
   mean(sapply(1:3, function(x) performance(data, x)))
 }
-sensitivity <- subset(imp[fakeNA,], PRESUNTOtxt == "Homicide")
-message("the multiple imputation has sensitivity of: \n")
+sensitivity <- subset(imp[fakeFirearmAccidents,], PRESUNTOtxt == "Accident")
+message("proportion of firearm accidents which are correctly identified (multiple imputation):")
 message(avePerformance(sensitivity) / length(sensitivity$PRESUNTOtxt))
 
-specificity <- subset(imp[fakeNA,], PRESUNTOtxt == "Accident")
-message("the multiple imputation has specifity of: \n")
+specificity <- subset(imp[fakeFirearmAccidents,], PRESUNTOtxt == "Homicide")
+message("proportion of firearm homicides which are correctly identified (multiple imputation):")
 message(avePerformance(specificity) / length(specificity$PRESUNTOtxt))
 
 

@@ -24,7 +24,7 @@ In the data directory you'll find the following files:
 
 *sinaloa-deaths.csv.bz2*: All injury intent deaths (accidents, suicides, homicides, unspecified, and legal operations) registered in the state of Sinaloa by the Mexican vital statistic system from 2004 to 2009
 
-The file _DE-SSA08.doc_ contains a description of the variables in sinaloa-deaths.csv.bz2 (Spanich)
+The file _DE-SSA08.doc_ contains a description of the variables in sinaloa-deaths.csv.bz2 (Spanish)
 
 Sources
 -------

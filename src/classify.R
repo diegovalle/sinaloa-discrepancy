@@ -9,10 +9,13 @@
 
 #Clean the data
 hom.sinaloa <- subset(deaths, ABBRV %in% c("Sin") )
+##Add the accidental deaths by firearm in the rest of Mexico
+hom.sinaloa <- rbind(hom.sinaloa, accidents.mx)
 #No legal interventions deaths in Sinaloa
 nrow(hom.sinaloa[hom.sinaloa$PRESUNTOtxt == "Legal intervention, operations of war, military operations, and terrorism",]) == 0
 #Only deaths by injury cause of Firearm
 hom.sinaloa <- subset(hom.sinaloa, CAUSE == "Firearm" & PRESUNTOtxt %in% c("Accident", "Homicide"))
+nrow(hom.sinaloa)
 
 
 hom.sinaloa$LUGLEStxt <- as.character(hom.sinaloa$LUGLEStxt)
@@ -22,6 +25,8 @@ hom.sinaloa$PRESUNTOtxt <- as.character(hom.sinaloa$PRESUNTOtxt)
 hom.sinaloa$EDADVALOR <- ifelse(hom.sinaloa$EDADVALOR == 998, NA, hom.sinaloa$EDADVALOR)
 hom.sinaloa$EDADVALOR <- sqrt(hom.sinaloa$EDADVALOR)
 hom.sinaloa$LUGLEStxt <- ifelse(hom.sinaloa$LUGLEStxt == "Unknown", NA, hom.sinaloa$LUGLEStxt)
+hom.sinaloa$OCUPACIONtxt <- as.factor(as.character(hom.sinaloa$OCUPACIONtxt))
+hom.sinaloa$HORADEF <- ifelse(hom.sinaloa$HORADEF == 24, NA, hom.sinaloa$HORADEF)
 
 hom.sinaloa$EDOCIVILtxt <- ifelse(is.na(hom.sinaloa$EDOCIVILtxt), "Less than 12", hom.sinaloa$EDOCIVILtxt)
 hom.sinaloa$EDOCIVILtxt  <- ifelse(hom.sinaloa$EDOCIVILtxt == "Unknown", NA, hom.sinaloa$EDOCIVILtxt)
@@ -40,45 +45,102 @@ hom.sinaloa$LUGLEStxt <- as.factor(hom.sinaloa$LUGLEStxt)
 hom.sinaloa$EDOCIVILtxt <- as.factor(hom.sinaloa$EDOCIVILtxt)
 
 
+hom.sinaloa <- subset(hom.sinaloa, !(PRESUNTOtxt == "Homicide" & ANIODEF %in% 2007:2008))
 #Set 2007 and 2008 Accidents and Homicides by Injury Cause of Firearm as NA
 hom.sinaloa$PRESUNTOtxt[hom.sinaloa$ANIODEF %in% c(2007, 2008) &
       #                 hom.sinaloa$CAUSE == "Firearm" &
-                       hom.sinaloa$PRESUNTOtxt %in% c("Accident", "Homicide")] <- NA
-hom.sinaloa <- subset(hom.sinaloa, ANIODEF <= 2008)
+                       hom.sinaloa$PRESUNTOtxt %in% c("Accident") &
+                        hom.sinaloa$ABBRV == "Sin"] <- NA
+
 y <- c("PRESUNTOtxt")
-x <- c("EDADVALOR", "SEXOtxt", "LUGLEStxt", "EDOCIVILtxt", "NECROPCIAtxt", "ANIODEF",
-       "wday", "MESDEF")
+x <- c("EDADVALOR", "SEXOtxt", "LUGLEStxt", "ANIODEF", "EDOCIVILtxt", 
+       "wday", "MESDEF", "NECROPCIAtxt")
 #hom.sinaloa[,x] <- apply(hom.sinaloa[,x], 2, as.factor) 
 
 
 #Use kNN to impute missing data
 hom.train <- hom.sinaloa[!is.na(hom.sinaloa$PRESUNTOtxt),]
-hom.train <- cbind(kNN(hom.train[,c(x)])[1:length(x)], PRESUNTOtxt = hom.train$PRESUNTOtxt)
+##hom.train <- cbind(kNN(hom.train[,c(x)])[1:length(x)], PRESUNTOtxt = hom.train$PRESUNTOtxt)
 
-#divide the data set into training and test
-inTrain <- createDataPartition(1:nrow(hom.train), p = 4/5, list = FALSE)
+#divide the data set into training and test sets
+inTrain <- createDataPartition(1:nrow(hom.train), p = 7/10, list = FALSE)
 
-train <- hom.train[inTrain,c(x,y)]
-test <- hom.train[-inTrain,c(x,y)]
+train <- na.omit(hom.train[inTrain,c(x,y)])
+test <- na.omit(hom.train[-inTrain,c(x,y)])
 #trainClass <- hom.train[inTrain, y]
 #testClass <- hom.train[-inTrain, y]
-
-
+nrow(train)
+nrow(test)
 
 prop.table(table(hom.train$PRESUNTOtxt))
 
 
 
-formula <-  PRESUNTOtxt ~ EDADVALOR + SEXOtxt + LUGLEStxt * ANIODEF + EDOCIVILtxt + NECROPCIAtxt + wday + MESDEF
-bootControl <- trainControl(number = 25)
+formula <-  PRESUNTOtxt ~ EDADVALOR * SEXOtxt * LUGLEStxt * ANIODEF * EDOCIVILtxt + NECROPCIAtxt
+bootControl <- trainControl(method='repeatedcv', 
+    number=3, 
+    repeats=1,
+    classProbs=TRUE)
 set.seed(2)
-rfFit <- train(formula,
+#multinom, plr, logitBoost, LMT
+
+if(file.exists("rfFit.RData")) {
+  load("rfFit.RData")
+} else {
+  message("Starting random forest:")
+  message("#############################")
+  message("#############################")
+  message("This will take some time")
+  message("#############################")
+  message("#############################")
+  rfFit <- train(formula,
                data = train,
-               method = "rf",
-               trControl = bootControl)
+               method = "glmnet",
+               trControl = bootControl,
+               preProcess = c("center", "scale"),
+               metric = "AUC")
+  save(rfFit, file = "rfFit.RData")
+}
 fit.pred.rf <- predict(rfFit, test)
-confusionMatrix(fit.pred.rf, test$PRESUNTOtxt)
-#plot(rfFit, metric='ROC')
+message("Classifying accidents and homicides by firearm with a random forest:")
+print(confusionMatrix(fit.pred.rf, test$PRESUNTOtxt))
+
+
+
+
+
+hom.unknown <- hom.sinaloa[is.na(hom.sinaloa$PRESUNTOtxt),]
+ddply(hom.unknown, .(ANIODEF), nrow)
+##write.csv(hom.unknown, "t.csv")
+hom.unknown[,c(x)] <- kNN(hom.unknown[,c(x)], k = 15)[1:length(x)]
+  
+fit.unknown <- predict(rfFit, hom.unknown[,c(x)])
+print(table(fit.unknown))
+hom.unknown$intent.imputed <- fit.unknown
+
+ddply(hom.unknown, .(ANIODEF, intent.imputed), nrow)
+
+  df.pred <- rbind.fill([!is.na(hom.sinaloa$intent),], hom.unknown)
+  df.pred$intent.imputed <- with(df.pred,
+                                 ifelse(is.na(intent),
+                                        as.character(intent.imputed),
+                                        as.character(intent)))
+  original <- ddply(df.pred, .(year(date2), month(date2), intent), nrow)
+  
+  imputed <- ddply(df.pred, .(year(date2), month(date2), intent.imputed), nrow)
+  
+
+set.seed(2)
+glmnetFit <- train(formula,
+               data = train,
+               method = "svmLinear",
+               trControl = bootControl)
+fit.pred.glmnet <- predict(glmnetFit, test)
+message("Classifying accidents and homicides by firearm with regularized regression:")
+print(confusionMatrix(fit.pred.glmnet, test$PRESUNTOtxt))
+
+
+
 
 #formula <-  PRESUNTOtxt ~ SEXOtxt + LUGLEStxt + EDOCIVILtxt + NECROPCIAtxt
 ## glm.fit <- glm(formula, data = train, family = binomial)

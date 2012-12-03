@@ -11,6 +11,9 @@
 #as accidents whose cause of injury was a firearm.
 
 
+#If you run the classifiers it will take a long time to run
+
+
 #libraries needed for the analysis
 source(file.path("src", "load-libraries.R"))
 #load all injury intent deaths in the state of Sinaloa

@@ -17,7 +17,7 @@ library(Amelia)
 library(glmnet)
 library(VIM)
 #library(doMC)
-library(Zelig)
+#library(Zelig)
 #registerDoMC(2)
 options(asciiType = "org")
 

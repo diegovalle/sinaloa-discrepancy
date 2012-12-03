@@ -19,3 +19,11 @@ deaths[which(deaths$MESDEF == 0),]$MESDEF <- deaths[which(deaths$MESDEF == 0),]$
 deaths[which(deaths$DIADEF == 0),]$DIADEF <- deaths[which(deaths$DIADEF == 0),]$DIAREG
 
 #deaths[which(is.na(as.Date(str_c(deaths$ANIODEF, deaths$MESDEF, deaths$DIADEF, sep="-")))),] 
+
+
+##Firearm accidents in the rest of Mexico, useful for training
+accidents.mx <- read.csv("data/firearm-accidents-not-sinaloa.csv.bz2")
+##accidents.mx$date <- NULL
+accidents.mx$Age <- NULL
+accidents.mx$X <- NULL
+accidents.mx$DERHABtxt <- NULL
