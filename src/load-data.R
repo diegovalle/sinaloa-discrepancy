@@ -23,6 +23,7 @@ deaths[which(deaths$DIADEF == 0),]$DIADEF <- deaths[which(deaths$DIADEF == 0),]$
 
 ##Firearm accidents in the rest of Mexico, useful for training
 accidents.mx <- read.csv("data/firearm-accidents-not-sinaloa.csv.bz2")
+accidents.mx <- subset(accidents.mx, ABBRV != "Chis")
 ##accidents.mx$date <- NULL
 accidents.mx$Age <- NULL
 accidents.mx$X <- NULL

@@ -136,7 +136,7 @@ ddply(subset(deaths,
 
 ddply(subset(deaths, 
              PRESUNTOtxt == "Accident" &
-             ABBRV== "Sin"),
+             ABBRV== "Sin"& CAUSE == "Firearm"),
       .(ANIODEF, CAUSE),
       nrow)
 
@@ -179,8 +179,8 @@ p <- ggplot(ddply(subset(deaths, CAUSE == "Firearm" &
   ylab("number of homicides (log scale)") +
   xlab("year") +
   opts(title = "Homicides by firearm in Sinaloa, by place of occurrence") +
-  xlim(2004, 2011)+
-  scale_y_log10() 
+  xlim(2004, 2011)##+
+  ##scale_y_log10() 
 direct.label(p, "last.bumpup")
 ggsave("graphs/homicide-place.png", dpi = 100,
        w = 9.6, h = 5)

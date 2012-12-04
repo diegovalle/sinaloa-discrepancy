@@ -84,10 +84,10 @@ bootControl <- trainControl(method='repeatedcv',
 set.seed(2)
 #multinom, plr, logitBoost, LMT
 
-if(file.exists("rfFit.RData")) {
-  load("rfFit.RData")
-} else {
-  message("Starting random forest:")
+##if(file.exists("rfFit.RData")) {
+##  load("rfFit.RData")
+##} else {
+  message("Starting Penalized Regression:")
   message("#############################")
   message("#############################")
   message("This will take some time")
@@ -100,9 +100,9 @@ if(file.exists("rfFit.RData")) {
                preProcess = c("center", "scale"),
                metric = "AUC")
   save(rfFit, file = "rfFit.RData")
-}
+##}
 fit.pred.rf <- predict(rfFit, test)
-message("Classifying accidents and homicides by firearm with a random forest:")
+message("Classifying accidents and homicides by firearm with glmnet:")
 print(confusionMatrix(fit.pred.rf, test$PRESUNTOtxt))
 
 
@@ -118,26 +118,27 @@ fit.unknown <- predict(rfFit, hom.unknown[,c(x)])
 print(table(fit.unknown))
 hom.unknown$intent.imputed <- fit.unknown
 
-ddply(hom.unknown, .(ANIODEF, intent.imputed), nrow)
+message("The classified firearm accidents in 2007 and 2008:")
+print(ddply(hom.unknown, .(ANIODEF, intent.imputed), nrow))
 
-  df.pred <- rbind.fill([!is.na(hom.sinaloa$intent),], hom.unknown)
-  df.pred$intent.imputed <- with(df.pred,
-                                 ifelse(is.na(intent),
-                                        as.character(intent.imputed),
-                                        as.character(intent)))
-  original <- ddply(df.pred, .(year(date2), month(date2), intent), nrow)
+  ## df.pred <- rbind.fill([!is.na(hom.sinaloa$intent),], hom.unknown)
+  ## df.pred$intent.imputed <- with(df.pred,
+  ##                                ifelse(is.na(intent),
+  ##                                       as.character(intent.imputed),
+  ##                                       as.character(intent)))
+  ## original <- ddply(df.pred, .(year(date2), month(date2), intent), nrow)
   
-  imputed <- ddply(df.pred, .(year(date2), month(date2), intent.imputed), nrow)
+  ## imputed <- ddply(df.pred, .(year(date2), month(date2), intent.imputed), nrow)
   
 
-set.seed(2)
-glmnetFit <- train(formula,
-               data = train,
-               method = "svmLinear",
-               trControl = bootControl)
-fit.pred.glmnet <- predict(glmnetFit, test)
-message("Classifying accidents and homicides by firearm with regularized regression:")
-print(confusionMatrix(fit.pred.glmnet, test$PRESUNTOtxt))
+## set.seed(2)
+## glmnetFit <- train(formula,
+##                data = train,
+##                method = "svmLinear",
+##                trControl = bootControl)
+## fit.pred.glmnet <- predict(glmnetFit, test)
+## message("Classifying accidents and homicides by firearm with regularized regression:")
+## print(confusionMatrix(fit.pred.glmnet, test$PRESUNTOtxt))
 
 
 
