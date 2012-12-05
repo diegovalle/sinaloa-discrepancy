@@ -106,13 +106,28 @@ message("Classifying accidents and homicides by firearm with glmnet:")
 print(confusionMatrix(fit.pred.rf, test$PRESUNTOtxt))
 
 
+hom.unknown <- hom.sinaloa[is.na(hom.sinaloa$PRESUNTOtxt) & !is.na(hom.sinaloa$LUGLEStxt),]
+inTrain <- createDataPartition(1:nrow(hom.unknown), p = 4/5, list = FALSE)
+hom.unknown[-inTrain, "LUGLEStxt"] <- NA
 
+message("Imputing missing data for the predictors fed into the penalized regression")
+message("Computing optimal number of groups for knn")
+k <- 1
+min <- 0
+for(i in 1:30) {
+  temp <- confusionMatrix(kNN(hom.unknown[,c(x)], k = i)$LUGLEStxt,
+                          hom.sinaloa[is.na(hom.sinaloa$PRESUNTOtxt) & !is.na(hom.sinaloa$LUGLEStxt),]$LUGLEStxt)$overall[1]
+  if(temp > min) {
+    min <- temp
+    k <- i
+  }
+}
 
 
 hom.unknown <- hom.sinaloa[is.na(hom.sinaloa$PRESUNTOtxt),]
 ddply(hom.unknown, .(ANIODEF), nrow)
 ##write.csv(hom.unknown, "t.csv")
-hom.unknown[,c(x)] <- kNN(hom.unknown[,c(x)], k = 15)[1:length(x)]
+hom.unknown[,c(x)] <- kNN(hom.unknown[,c(x)], k = k)[1:length(x)]
   
 fit.unknown <- predict(rfFit, hom.unknown[,c(x)])
 print(table(fit.unknown))
